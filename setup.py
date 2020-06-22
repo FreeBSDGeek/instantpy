@@ -6,17 +6,17 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="instantpy",
     version="0.0.1",
-    author="Michael Wood",
-    author_email="mww012@gmail.com",
+    author="Kirk Davis",
+    author_email="kirk.github@bohica.net",
     description="A Python wrapper for Aruba Instant REST API",
-    long_description=long_description,
+    long_description="Aruba Instant API by Michael Wood (mww012@gmail.com) backported to Python2 by Kirk Davis (kirk.github@bohica.net)",
     long_description_content_type="text/markdown",
-    url="https://github.com/mww012/instantpy.git",
+    url="https://github.com/FreeBSDGeek/instantpy.git",
     packages=setuptools.find_packages(exclude=['.vscode/']),
     classifiers=[
-        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 2",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.6'
+    python_requires='>=2.7'
 )

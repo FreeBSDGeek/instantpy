@@ -1,6 +1,8 @@
 # Aruba Instant Python API Wrapper
 
-This module provides a Python 3 interface for the Aruba Instant 8.6 REST API.
+This module provides a Python interface for the Aruba Instant 8.6 REST API.
+
+This version of the module will work with Python 2.7 and above.
 
 **Please understand this project is a WIP.  I'd also really appreciate some help testing.  My Instant cluster is my production wifi at home.  I can't thoroughly test certain calls to the API (specifically in the Configuration portion) because breaking the wifi at home would result in an unhappy household.**
 
@@ -15,6 +17,9 @@ Feel free to open an issue and request support for more commands if the structur
 
     NOTE: The response from the API is currently unstructred text and requires parsing with RegEx.  
     This lends itself to breaking easily between versions.  My current testing has been against 8.6.
+
+## Credits
+This version of the module is based on the great work by Michael Wood and backported by Kirk Davis to work with older versions of Python.  The origonal code by Michael Wood is located here: https://github.com/mww012/instantpy
 
 ## Action
 The action endpoints are used for configuring AP specific settings.  See below for supported endpoints.
