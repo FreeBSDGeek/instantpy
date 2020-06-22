@@ -44,7 +44,7 @@ class InstantVC:
         self.logged_in = False
         self.sid = None
         self._session = None
-        self.baseurl = f"https://{ip}:{port}/rest"
+        self.baseurl = "https://" + ip + ":" + str(port) + "/rest"
         self.template_basepath = template_basepath
         self.ssl_verify = ssl_verify
         self.headers = {"Content-Type": "application/json"}
@@ -55,7 +55,7 @@ class InstantVC:
         This method will generally be automatically called via the @autologin decorator.
         After 15 minutes of inactivity the VC will automatically log the session out.
         """
-        url = f"{self.baseurl}/login"
+        url = self.baseurl + "/login"
         creds = {"user": self.username, "passwd": self.password}
         with requests.Session() as session:
             response = session.post(
@@ -66,11 +66,11 @@ class InstantVC:
                 self.logged_in = True
                 self.sid = parsed["sid"]
                 self.session = session
-                self.params = f"sid={self.sid}"
+                self.params = "sid=" + self.sid
 
     def logout(self):
         """Log out of the VC"""
-        url = f"{self.baseurl}/logout"
+        url = self.baseurl + "/logout"
         data = json.dumps({})
         response = self.session.post(
             url,
@@ -93,7 +93,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from the VC
         """
-        url = f"{self.baseurl}/show-cmd?iap_ip_addr={self.ip}&cmd=show clients&sid={self.sid}"
+        url = self.baseurl + "/show-cmd?iap_ip_addr=" + self.ip + "&cmd=show clients&sid=" + self.sid
         regex = r"^(?P<name>\S+)?\s+(?P<ip>(?:\d{1,3}\.){3}\d{1,3})\s+(?P<mac>(?:\S{2}:){5}\S{2})\s+(?P<os>\S+\s?\S+)?\s+(?P<essid>\S+)\s+(?P<ap>\S+)\s+(?P<channel>\d{1,3}[+-]?)\s+(?P<phy>[A-Z]{2})\s+(?P<role>\S+)\s+(?P<ipv6>[a-f0-9:]{5,29}|--)?\s+(?P<signal>\d{1,3})\((?P<signal_text>\S+)\)\s+(?P<speed>\d{1,3})\((?P<speed_text>\S+)\)"
         response = self.session.get(url, verify=self.ssl_verify)
         devices_result = response.text.split("\\n")
@@ -127,7 +127,7 @@ class InstantVC:
             dict -- json formatted response from VC
         """
         url = (
-            f"{self.baseurl}/show-cmd?iap_ip_addr={self.ip}&cmd=show aps&sid={self.sid}"
+            self.baseurl + "/show-cmd?iap_ip_addr=" + self.ip + "&cmd=show aps&sid=" + self.sid
         )
         regex = r"^(?P<name>\S+)\s+(?P<ip>(?:\d{1,3}\.){3}\d{1,3})(?P<master>\*)?\s+(?P<mode>\S+)\s+(?P<spectrum>\S+)\s+(?P<clients>\S+)\s+(?P<type>\S+)\s+(?P<ipv6>[a-f0-9:]{5,29}|--)\s+(?P<meshrole>\S+)\s+(?P<zone>\S+)\s+(?P<serial>\S+)\s+(?P<r0chan>\S+)\s+(?P<r0pwr>\S+)\s+(?P<r0util>\S+?)\((?P<r0utiltxt>\S+?)\)\s+(?P<r0noiseflr>\S+?)\((?P<r0noiseflrtxt>\S+)\)\s+(?P<r1chan>\S+)\s+(?P<r1pwr>\S+)\s+(?P<r1util>\S+?)\((?P<r1utiltxt>\S+?)\)\s+(?P<r1noiseflr>\S+?)\((?P<r1noiseflrtxt>\S+)\)\s+(?P<r2chan>\S+)\s+(?P<r2pwr>\S+)\s+(?P<r2util>\S+?)(?:\((?P<r2utiltxt>\S+)\))?\s+(?P<r2noiseflr>\S+?)(?:\((?P<r2noiseflrtxt>\S+)\))?\s+(?P<needantcfg>\S+)\s+(?P<fromport>\S+)\s+(?P<cfgid>\S+)\s+(?P<cfgcsum>\S+)\s+(?P<extssidactive>\S+)\s+(?P<age>\S+)\s+(?P<linklocal>\S+)\s+(?P<uplink>\S+)['\"]"
         response = self.session.get(url, verify=self.ssl_verify)
@@ -184,12 +184,12 @@ class InstantVC:
         Returns:
             str -- Running configuration formatted as a block of text
         """
-        url = f"{self.baseurl}/show-cmd?iap_ip_addr={self.ip}&cmd=show running-config&sid={self.sid}"
+        url = self.baseurl + "/show-cmd?iap_ip_addr=" + self.ip + "&cmd=show running-config&sid=" + self.sid
         response = self.session.get(url, verify=self.ssl_verify)
         parsed = response.json()["Command output"].splitlines()
         config = ""
         for line in parsed[3:]:
-            config = f"{config}{line}\n"
+            config = config + line + "\n"
         return config
 
     @autologin
@@ -202,12 +202,12 @@ class InstantVC:
         Returns:
             str -- Command output as text
         """
-        url = f"{self.baseurl}/show-cmd?iap_ip_addr={self.ip}&cmd={command}&sid={self.sid}"
+        url = self.baseurl + "/show-cmd?iap_ip_addr=" + self.ip + "&cmd=" + command + "&sid=" + self.sid
         response = self.session.get(url, verify=self.ssl_verify)
         parsed = response.json()["Command output"].splitlines()
         output = ""
         for line in parsed[3:]:
-            output = f"{output}{line}\n"
+            output = output + line + "\n"
         return output
 
     @autologin
@@ -221,7 +221,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from the VC
         """
-        url = f"{self.baseurl}/hostname"
+        url = self.baseurl + "/hostname"
         data = json.dumps({"iap_ip_addr": iap_ip, "hostname_info": {"hostname": name}})
         response = self.session.post(
             url,
@@ -245,7 +245,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from VC
         """
-        url = f"{self.baseurl}/zone"
+        url = self.baseurl + "/zone"
         data = json.dumps(
             {"iap_ip_addr": iap_ip, "zone_info": {"action": action, "zonename": name}}
         )
@@ -260,7 +260,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -274,7 +274,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from VC
         """
-        url = f"{self.baseurl}/swarm-mode"
+        url = self.baseurl + "/swarm-mode"
         data = json.dumps({"iap_ip_addr": iap_ip, "swarm-mode": {"swarm-mode": mode,}})
         response = self.session.post(
             url,
@@ -287,7 +287,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -306,7 +306,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from VC
         """
-        url = f"{self.baseurl}/channel"
+        url = self.baseurl + "/channel"
         data = json.dumps(
             {
                 "iap_ip_addr": iap_ip,
@@ -327,7 +327,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -342,7 +342,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from VC
         """
-        url = f"{self.baseurl}/antenna-gain"
+        url = self.baseurl + "/antenna-gain"
         data = json.dumps(
             {
                 "iap_ip_addr": iap_ip,
@@ -363,7 +363,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -378,7 +378,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from VC
         """
-        url = f"{self.baseurl}/radio-state"
+        url = self.baseurl + "/radio-state"
         data = json.dumps(
             {
                 "iap_ip_addr": iap_ip,
@@ -399,7 +399,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -412,7 +412,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from VC
         """
-        url = f"{self.baseurl}/country-code"
+        url = self.baseurl + "/country-code"
         with open(self.template_basepath + template, "r") as f:
             data = f.read()
         response = self.session.post(
@@ -426,7 +426,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -439,7 +439,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from VC
         """
-        url = f"{self.baseurl}/virtual-controller-ip"
+        url = self.baseurl + "/virtual-controller-ip"
         with open(self.template_basepath + template, "r") as f:
             data = f.read()
         response = self.session.post(
@@ -453,7 +453,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -467,7 +467,7 @@ class InstantVC:
             dict -- Json formatted response from VC
 
         """
-        url = f"{self.baseurl}/ntp-server"
+        url = self.baseurl + "/ntp-server"
         with open(self.template_basepath + template, "r") as f:
             data = f.read()
         response = self.session.post(
@@ -481,7 +481,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -494,7 +494,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from VC
         """
-        url = f"{self.baseurl}/syslocation"
+        url = self.baseurl + "/syslocation"
         with open(self.template_basepath + template, "r") as f:
             data = f.read()
         response = self.session.post(
@@ -508,7 +508,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -521,7 +521,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from VC
         """
-        url = f"{self.baseurl}/organization"
+        url = self.baseurl + "/organization"
         with open(self.template_basepath + template, "r") as f:
             data = f.read()
         response = self.session.post(
@@ -535,7 +535,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -548,7 +548,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from VC
         """
-        url = f"{self.baseurl}/syslog-level"
+        url = self.baseurl + "/syslog-level"
         with open(self.template_basepath + template, "r") as f:
             data = f.read()
         response = self.session.post(
@@ -562,7 +562,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -575,7 +575,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from VC
         """
-        url = f"{self.baseurl}/syslog-server"
+        url = self.baseurl + "/syslog-server"
         with open(self.template_basepath + template, "r") as f:
             data = f.read()
         response = self.session.post(
@@ -589,7 +589,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -605,7 +605,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from VC
         """
-        url = f"{self.baseurl}/radio-profile-11g"
+        url = self.baseurl + "/radio-profile-11g"
         with open(self.template_basepath + template, "r") as f:
             data = f.read()
         response = self.session.post(
@@ -619,7 +619,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + esponse.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -632,7 +632,7 @@ class InstantVC:
         Returns:
             dict -- Json formmated response from VC
         """
-        url = f"{self.baseurl}/syslog-server"
+        url = self.baseurl + "/syslog-server"
         with open(self.template_basepath + template, "r") as f:
             data = f.read()
         response = self.session.post(
@@ -646,7 +646,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -659,7 +659,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from VC
         """
-        url = f"{self.baseurl}/arm"
+        url = self.baseurl + "/arm"
         with open(self.template_basepath + template, "r") as f:
             data = f.read()
         response = self.session.post(
@@ -673,7 +673,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -686,7 +686,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from VC
         """
-        url = f"{self.baseurl}/ssid"
+        url = self.baseurl + "/ssid"
         with open(self.template_basepath + template, "r") as f:
             data = f.read()
         response = self.session.post(
@@ -700,7 +700,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -713,7 +713,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from VC
         """
-        url = f"{self.baseurl}/rf-band"
+        url = self.baseurl + "/rf-band"
         with open(self.template_basepath + template, "r") as f:
             data = f.read()
         response = self.session.post(
@@ -727,7 +727,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -740,7 +740,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from VC
         """
-        url = f"{self.baseurl}/auth-server"
+        url = self.baseurl + "/auth-server"
         with open(self.template_basepath + template, "r") as f:
             data = f.read()
         response = self.session.post(
@@ -754,7 +754,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -767,7 +767,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from VC
         """
-        url = f"{self.baseurl}/acl-rules"
+        url = self.baseurl + "/acl-rules"
         with open(self.template_basepath + template, "r") as f:
             data = f.read()
         response = self.session.post(
@@ -781,7 +781,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -794,7 +794,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from VC
         """
-        url = f"{self.baseurl}/ext-captive-portal-profile"
+        url = self.baseurl + "/ext-captive-portal-profile"
         with open(self.template_basepath + template, "r") as f:
             data = f.read()
         response = self.session.post(
@@ -808,7 +808,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -821,7 +821,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from VC
         """
-        url = f"{self.baseurl}/ids"
+        url = self.baseurl + "/ids"
         with open(self.template_basepath + template, "r") as f:
             data = f.read()
         response = self.session.post(
@@ -835,7 +835,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -848,7 +848,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from VC
         """
-        url = f"{self.baseurl}/os-upgrade"
+        url = self.baseurl + "/os-upgrade"
         with open(self.template_basepath + template, "r") as f:
             data = f.read()
         response = self.session.post(
@@ -862,7 +862,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -875,7 +875,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from VC
         """
-        url = f"{self.baseurl}/clock"
+        url = self.baseurl + "/clock"
         with open(self.template_basepath + template, "r") as f:
             data = f.read()
         response = self.session.post(
@@ -889,7 +889,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -902,7 +902,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from VC
         """
-        url = f"{self.baseurl}/reboot"
+        url = self.baseurl + "/reboot"
         with open(self.template_basepath + template, "r") as f:
             data = f.read()
         response = self.session.post(
@@ -916,7 +916,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -929,7 +929,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from VC
         """
-        url = f"{self.baseurl}/wired-port-profile"
+        url = self.baseurl + "/wired-port-profile"
         with open(self.template_basepath + template, "r") as f:
             data = f.read()
         response = self.session.post(
@@ -943,7 +943,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -959,7 +959,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from VC
         """
-        url = f"{self.baseurl}/wired-profile-map"
+        url = self.baseurl + "/wired-profile-map"
         with open(self.template_basepath + template, "r") as f:
             data = f.read()
         response = self.session.post(
@@ -973,7 +973,7 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
 
     @autologin
@@ -986,7 +986,7 @@ class InstantVC:
         Returns:
             dict -- Json formatted response from VC
         """
-        url = f"{self.baseurl}/mgmt-user"
+        url = self.baseurl + "/mgmt-user"
         with open(self.template_basepath + template, "r") as f:
             data = f.read()
         response = self.session.post(
@@ -1000,5 +1000,5 @@ class InstantVC:
             return response.json()
         elif response.json().get("Status-code") != 0:
             raise ValueError(
-                f"Error Code: {response.json().get('Status-code')} - {response.json().get('message')}"
+                "Error Code: " + response.json().get('Status-code') + " - " + response.json().get('message')
             )
